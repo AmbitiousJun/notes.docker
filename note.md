@@ -445,3 +445,58 @@ Dockerfile的常用指令如下：
 
 > 详细语法说明：https://docs.docker.com/engine/reference/builder
 
+### 4.3 DockerCompose
+
+- DockerCompose可以基于Compose文件帮我们快速的部署分布式应用，而无需手动一个个创建和运行容器
+- Compose文件是一个文本文件，通过指令定义集群中的每个容器如何运行
+
+示例：
+
+```yaml
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:5.7.25
+    environment:
+      MYSQL_ROOT_PASSWORD: 123
+    volumes: 
+      - /tmp/mysql/data:/var/lib/mysql
+      - /tmp/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf
+  web: 
+    build: .
+    ports: 
+      - 8090: 8090
+```
+
+> 官网详细语法：https://docs.docker.com/compose/compose-file/
+
+**DockerCompose的安装**
+
+1. 下载安装命令
+
+```sh
+curl -L https://github.com/docker/compose/releases/download/1.29.1/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
+```
+
+2. 修改文件权限
+
+```sh
+# 给docker-compose文件添加执行权
+chmod +x /usr/local/bin/docker-compose
+```
+
+3. 添加自动补全命令（在编辑compose文件的时候可以提示）
+
+```sh
+curl -L https://raw.githubusercontent.com/docker/compose/1.29.1/contrib/completion/bash/docker-compose > /etc/bash_completion.d/docker-compose
+```
+
+**使用docker-compose将cloud-demo微服务项目部署到服务器上**
+
+1. 在本地准备一个文件夹，内部包括：
+   - 每个微服务拥有一个单独的文件夹，文件夹中存有两个文件，Dockerfile和jar包
+   - docker-compose.yml文件，配置微服务的启动参数
+
+2. 将cloud-demo文件夹推送到服务器中
+3. 切换到cloud-demo目录下，执行命令`docker-compose up -d`即可自动构建服务并运行
