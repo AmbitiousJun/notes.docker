@@ -265,7 +265,157 @@ docker rm
 
 
 
+**案例：创建一个redis容器，并支持持久化**
 
+- 从官网中拉取5.0.14版本的redis镜像
+
+```sh
+docker pull redis:5.0.14
+```
+
+- 创建redis容器，起名为my_redis，容器后台运行，并且支持持久化
+  - `--save 60 1`命令的意思是每60秒只要有一个写操作发生就执行持久化操作
+
+```sh
+docker run --name my_redis -d redis:5.0.14 redis-server --save 60 1 --loglevel warning
+```
+
+- 进入redis容器中，连接redis服务器，并存入一条数据
+
+```sh
+docker exec -it my_redis bash
+
+redis-cli
+
+set num 666
+```
+
+### 3.3 数据卷（volume）操作
+
+数据卷是虚拟的，可以解决无法修改容器内部文件的问题，并且可实现配置文件复用。原理是在宿主机上创建一个真实目录，并由数据卷指向这个真实目录，容器只需要将内部的文件夹挂在到数据卷上，就可以跟真实目录进行双向绑定。
+
+**基本命令**
+
+创建一个volume
+
+```sh
+docker volume create
+```
+
+显示一个或多个volume的信息
+
+```sh
+docker volume inspect 
+```
+
+列出所有的volume
+
+```sh
+docker volume ls
+```
+
+删除未使用的volume
+
+```sh
+docker volume prune
+```
+
+删除指定的volume
+
+```sh
+docker volume rm
+```
+
+
+
+**案例：创建一个数据卷并执行一些简单操作**
+
+- 创建名为html的数据卷，并查看当前所有的数据卷
+
+![](./assets/数据卷创建成功.png)
+
+- 查看html数据卷的详细信息
+
+![](./assets/查看数据卷详情.png)
+
+- 删除数据卷
+
+![](./assets/删除数据卷.png)
+
+
+
+**数据卷挂载**
+
+挂载命令（创建容器时，如果数据卷不存在，docker会自动创建数据卷）：
+
+> -v 数据卷名称：容器内要进行挂载的目录
+
+
+
+**案例：创建一个nginx容器，将html目录挂载到数据卷html，使用vim修改里面的内容**
+
+- 创建nginx容器并挂载
+
+![](./assets/创建nginx容器并挂载.png)
+
+- 进入html数据卷所在目录，修改index.html即可
+
+
+
+**将宿主机文件/目录直接挂载到容器中**
+
+**案例：创建并运行mysql容器，挂载conf文件和data目录**
+
+- 拉取MySQL镜像
+
+```sh
+docker pull mysql:5.7.25
+```
+
+- 创建配置文件目录和配置文件
+
+```sh
+mkdir -p /tmp/mysql/conf
+cd /tmp/mysql/conf
+touch my.cnf
+```
+
+- 创建数据存储目录
+
+```sh
+cd ..
+mkdir data
+```
+
+- 创建并运行MySQL容器
+
+  - 指定环境变量`-e MYSQL_ROOT_PASSWORD=cyj070723`
+  - 挂载配置文件`-v /tmp/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf`
+  - 挂载数据目录`-v /tmp/mysql/conf/data:/var/lib/mysql`
+  - 指定后台运行
+  - 端口映射
+  - 容器名称
+  - 镜像
+
+  > 最终命令如下：
+  >
+  > docker run \
+  >
+  > ​    --name my_sql \
+  >
+  > ​    -p 3306:3306 \
+  >
+  > ​    -e MYSQL_ROOT_PASSWORD=cyj070723 \
+  >
+  > ​    -v /tmp/mysql/conf/my.cnf:/etc/mysql/conf.d/my.cnf \
+  >
+  > ​    -v /tmp/mysql/data:/var/lib/mysql \
+  >
+  > ​    -d \
+  >
+  > ​    mysql:5.7.25
+
+![](./assets/创建mysql容器.png)
 
 
 
